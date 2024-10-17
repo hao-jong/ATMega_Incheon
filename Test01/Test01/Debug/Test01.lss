@@ -3,27 +3,29 @@ Test01.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  000000f8  2**0
+  0 .data         00000000  00800100  00800100  00000202  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         000000a4  00000000  00000000  00000054  2**1
+  1 .text         000001ae  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  000000f8  2**0
+  2 .comment      00000030  00000000  00000000  00000202  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000128  2**2
+  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000234  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000020  00000000  00000000  00000168  2**0
+  4 .debug_aranges 00000020  00000000  00000000  00000274  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   000007fc  00000000  00000000  00000188  2**0
+  5 .debug_info   00000a26  00000000  00000000  00000294  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 0000075f  00000000  00000000  00000984  2**0
+  6 .debug_abbrev 00000810  00000000  00000000  00000cba  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   000001a5  00000000  00000000  000010e3  2**0
+  7 .debug_line   00000343  00000000  00000000  000014ca  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000024  00000000  00000000  00001288  2**2
+  8 .debug_frame  00000024  00000000  00000000  00001810  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000003e1  00000000  00000000  000012ac  2**0
+  9 .debug_str    00000411  00000000  00000000  00001834  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_ranges 00000010  00000000  00000000  0000168d  2**0
+ 10 .debug_loc    000002ec  00000000  00000000  00001c45  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000010  00000000  00000000  00001f31  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -108,22 +110,198 @@ Disassembly of section .text:
   94:	de bf       	out	0x3e, r29	; 62
   96:	cd bf       	out	0x3d, r28	; 61
   98:	02 d0       	rcall	.+4      	; 0x9e <main>
-  9a:	02 c0       	rjmp	.+4      	; 0xa0 <_exit>
+  9a:	87 c0       	rjmp	.+270    	; 0x1aa <_exit>
 
 0000009c <__bad_interrupt>:
   9c:	b1 cf       	rjmp	.-158    	; 0x0 <__vectors>
 
 0000009e <main>:
-
-#include <avr/io.h>
-
+		//}
+//}
 
 int main(void)
 {
-  9e:	ff cf       	rjmp	.-2      	; 0x9e <main>
+	DDRG |= 0x10; // xxxx xxxx ==> xxx1 xxxx:  1 = 출력 , 0 = 입력
+  9e:	e4 e6       	ldi	r30, 0x64	; 100
+  a0:	f0 e0       	ldi	r31, 0x00	; 0
+  a2:	80 81       	ld	r24, Z
+  a4:	80 61       	ori	r24, 0x10	; 16
+  a6:	80 83       	st	Z, r24
+	DDRG &= ~0x07; // xxxx xxxx ==> xxxx x000:  1 = 출력 , 0 = 입력
+  a8:	80 81       	ld	r24, Z
+  aa:	88 7f       	andi	r24, 0xF8	; 248
+  ac:	80 83       	st	Z, r24
+	int i = 0;
+	int j = 0;
+	
+	while(1)
+	{
+		in_a = PING & 0x01;
+  ae:	80 91 63 00 	lds	r24, 0x0063	; 0x800063 <__TEXT_REGION_LENGTH__+0x7e0063>
+		if(in_a == 0)
+  b2:	80 fd       	sbrc	r24, 0
+  b4:	fc cf       	rjmp	.-8      	; 0xae <main+0x10>
+  b6:	e0 e0       	ldi	r30, 0x00	; 0
+  b8:	f0 e0       	ldi	r31, 0x00	; 0
+  ba:	60 e0       	ldi	r22, 0x00	; 0
+  bc:	70 e0       	ldi	r23, 0x00	; 0
+	}
+	
+	
+	while(1)
+	{
+		in_b = (PING & 0x02);  // PING1 비트를 0 또는 1로 변환
+  be:	a3 e6       	ldi	r26, 0x63	; 99
+  c0:	b0 e0       	ldi	r27, 0x00	; 0
+  c2:	9c 91       	ld	r25, X
+		in_c = (PING & 0x04);
+  c4:	8c 91       	ld	r24, X
+  c6:	84 70       	andi	r24, 0x04	; 4
+	
+		if(!(in_b) && (in_c))
+  c8:	29 2f       	mov	r18, r25
+  ca:	22 70       	andi	r18, 0x02	; 2
+  cc:	91 fd       	sbrc	r25, 1
+  ce:	17 c0       	rjmp	.+46     	; 0xfe <main+0x60>
+  d0:	88 23       	and	r24, r24
+  d2:	a9 f0       	breq	.+42     	; 0xfe <main+0x60>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
 
-000000a0 <_exit>:
-  a0:	f8 94       	cli
+	__builtin_avr_delay_cycles(__ticks_dc);
+  d4:	0f ef       	ldi	r16, 0xFF	; 255
+  d6:	15 ea       	ldi	r17, 0xA5	; 165
+  d8:	2e e0       	ldi	r18, 0x0E	; 14
+  da:	01 50       	subi	r16, 0x01	; 1
+  dc:	10 40       	sbci	r17, 0x00	; 0
+  de:	20 40       	sbci	r18, 0x00	; 0
+  e0:	e1 f7       	brne	.-8      	; 0xda <main+0x3c>
+  e2:	00 c0       	rjmp	.+0      	; 0xe4 <main+0x46>
+  e4:	00 00       	nop
+		{
+			_delay_ms(300);
+			i++;
+  e6:	6f 5f       	subi	r22, 0xFF	; 255
+  e8:	7f 4f       	sbci	r23, 0xFF	; 255
+  ea:	3f ef       	ldi	r19, 0xFF	; 255
+  ec:	85 ea       	ldi	r24, 0xA5	; 165
+  ee:	9e e0       	ldi	r25, 0x0E	; 14
+  f0:	31 50       	subi	r19, 0x01	; 1
+  f2:	80 40       	sbci	r24, 0x00	; 0
+  f4:	90 40       	sbci	r25, 0x00	; 0
+  f6:	e1 f7       	brne	.-8      	; 0xf0 <main+0x52>
+  f8:	00 c0       	rjmp	.+0      	; 0xfa <main+0x5c>
+  fa:	00 00       	nop
+  fc:	17 c0       	rjmp	.+46     	; 0x12c <main+0x8e>
+			_delay_ms(300);
+		
+		}
+		else if((in_b) && !(in_c))
+  fe:	22 23       	and	r18, r18
+ 100:	a9 f0       	breq	.+42     	; 0x12c <main+0x8e>
+ 102:	81 11       	cpse	r24, r1
+ 104:	13 c0       	rjmp	.+38     	; 0x12c <main+0x8e>
+ 106:	af ef       	ldi	r26, 0xFF	; 255
+ 108:	b5 ea       	ldi	r27, 0xA5	; 165
+ 10a:	0e e0       	ldi	r16, 0x0E	; 14
+ 10c:	a1 50       	subi	r26, 0x01	; 1
+ 10e:	b0 40       	sbci	r27, 0x00	; 0
+ 110:	00 40       	sbci	r16, 0x00	; 0
+ 112:	e1 f7       	brne	.-8      	; 0x10c <main+0x6e>
+ 114:	00 c0       	rjmp	.+0      	; 0x116 <main+0x78>
+ 116:	00 00       	nop
+		{
+			_delay_ms(300);
+			j++;
+ 118:	31 96       	adiw	r30, 0x01	; 1
+ 11a:	1f ef       	ldi	r17, 0xFF	; 255
+ 11c:	25 ea       	ldi	r18, 0xA5	; 165
+ 11e:	3e e0       	ldi	r19, 0x0E	; 14
+ 120:	11 50       	subi	r17, 0x01	; 1
+ 122:	20 40       	sbci	r18, 0x00	; 0
+ 124:	30 40       	sbci	r19, 0x00	; 0
+ 126:	e1 f7       	brne	.-8      	; 0x120 <main+0x82>
+ 128:	00 c0       	rjmp	.+0      	; 0x12a <main+0x8c>
+ 12a:	00 00       	nop
+			_delay_ms(300);
+		
+		}
 
-000000a2 <__stop_program>:
-  a2:	ff cf       	rjmp	.-2      	; 0xa2 <__stop_program>
+        PORTG |= 0x10; // bit on
+ 12c:	a5 e6       	ldi	r26, 0x65	; 101
+ 12e:	b0 e0       	ldi	r27, 0x00	; 0
+ 130:	8c 91       	ld	r24, X
+ 132:	80 61       	ori	r24, 0x10	; 16
+ 134:	8c 93       	st	X, r24
+        for(int k = 0; k < 200+10*i-10*j; k++) 
+ 136:	40 e0       	ldi	r20, 0x00	; 0
+ 138:	50 e0       	ldi	r21, 0x00	; 0
+ 13a:	08 c0       	rjmp	.+16     	; 0x14c <main+0xae>
+ 13c:	8f e9       	ldi	r24, 0x9F	; 159
+ 13e:	9f e0       	ldi	r25, 0x0F	; 15
+ 140:	01 97       	sbiw	r24, 0x01	; 1
+ 142:	f1 f7       	brne	.-4      	; 0x140 <main+0xa2>
+ 144:	00 c0       	rjmp	.+0      	; 0x146 <main+0xa8>
+ 146:	00 00       	nop
+ 148:	4f 5f       	subi	r20, 0xFF	; 255
+ 14a:	5f 4f       	sbci	r21, 0xFF	; 255
+ 14c:	cb 01       	movw	r24, r22
+ 14e:	88 0f       	add	r24, r24
+ 150:	99 1f       	adc	r25, r25
+ 152:	88 0f       	add	r24, r24
+ 154:	99 1f       	adc	r25, r25
+ 156:	88 0f       	add	r24, r24
+ 158:	99 1f       	adc	r25, r25
+ 15a:	9b 01       	movw	r18, r22
+ 15c:	22 0f       	add	r18, r18
+ 15e:	33 1f       	adc	r19, r19
+ 160:	82 0f       	add	r24, r18
+ 162:	93 1f       	adc	r25, r19
+ 164:	88 53       	subi	r24, 0x38	; 56
+ 166:	9f 4f       	sbci	r25, 0xFF	; 255
+ 168:	a6 ef       	ldi	r26, 0xF6	; 246
+ 16a:	2a 2f       	mov	r18, r26
+ 16c:	8f 01       	movw	r16, r30
+ 16e:	20 03       	mulsu	r18, r16
+ 170:	e0 01       	movw	r28, r0
+ 172:	21 9f       	mul	r18, r17
+ 174:	d0 0d       	add	r29, r0
+ 176:	11 24       	eor	r1, r1
+ 178:	8c 0f       	add	r24, r28
+ 17a:	9d 1f       	adc	r25, r29
+ 17c:	48 17       	cp	r20, r24
+ 17e:	59 07       	cpc	r21, r25
+ 180:	ec f2       	brlt	.-70     	; 0x13c <main+0x9e>
+		{
+	        _delay_ms(1);
+        }
+        PORTG &= ~0x10; // bit off
+ 182:	a5 e6       	ldi	r26, 0x65	; 101
+ 184:	b0 e0       	ldi	r27, 0x00	; 0
+ 186:	2c 91       	ld	r18, X
+ 188:	2f 7e       	andi	r18, 0xEF	; 239
+ 18a:	2c 93       	st	X, r18
+        for(int k = 0; k < 200+10*i-10*j; k++) 
+ 18c:	20 e0       	ldi	r18, 0x00	; 0
+ 18e:	30 e0       	ldi	r19, 0x00	; 0
+ 190:	08 c0       	rjmp	.+16     	; 0x1a2 <main+0x104>
+ 192:	af e9       	ldi	r26, 0x9F	; 159
+ 194:	bf e0       	ldi	r27, 0x0F	; 15
+ 196:	11 97       	sbiw	r26, 0x01	; 1
+ 198:	f1 f7       	brne	.-4      	; 0x196 <main+0xf8>
+ 19a:	00 c0       	rjmp	.+0      	; 0x19c <main+0xfe>
+ 19c:	00 00       	nop
+ 19e:	2f 5f       	subi	r18, 0xFF	; 255
+ 1a0:	3f 4f       	sbci	r19, 0xFF	; 255
+ 1a2:	28 17       	cp	r18, r24
+ 1a4:	39 07       	cpc	r19, r25
+ 1a6:	ac f3       	brlt	.-22     	; 0x192 <main+0xf4>
+ 1a8:	8a cf       	rjmp	.-236    	; 0xbe <main+0x20>
+
+000001aa <_exit>:
+ 1aa:	f8 94       	cli
+
+000001ac <__stop_program>:
+ 1ac:	ff cf       	rjmp	.-2      	; 0x1ac <__stop_program>
