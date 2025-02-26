@@ -4,10 +4,10 @@
 	#include <avr/delay.h>
 	#include <avr/interrupt.h>
 
-	#define CDDR	DDRA
-	#define IDDR	DDRB
-	#define CPORT	PORTA
-	#define IPORT	PORTB
+	#define CDDR	DDRB
+	#define IDDR	DDRA
+	#define CPORT	PORTB
+	#define IPORT	PORTA
 
 	unsigned char img[] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x27, 0x7f, 0x67};
 
